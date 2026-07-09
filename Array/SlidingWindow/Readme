@@ -1,0 +1,144 @@
+### Sliding Window Boilerplate
+
+---
+
+### All Problems We Solved
+
+```
+1. Max Consecutive Ones III        → longest window, k zeros allowed
+2. Longest Non-Repeating Chars     → longest window, 0 duplicates
+3. Fruit Baskets                   → longest window, 2 distinct
+4. K Distinct Characters           → longest window, k distinct
+5. Longest Repeating Char Replace  → longest window, windowSize-maxFreq≤k
+6. Minimum Window Substring        → SHORTEST window, all t chars present
+```
+
+---
+
+### Two Templates Emerge
+
+---
+
+## Template 1 — Find LONGEST Window
+### (Problems 1, 2, 3, 4, 5)
+
+```cpp
+int left = 0, right = 0;
+int maximum = 0;
+// extra variables based on problem
+// (map, set, counter, maxFreq etc.)
+
+while(right < size){
+
+    // ─── EXPAND ───
+    // add s[right] or nums[right] to state
+    // update tracking variable
+
+    // ─── CHECK VALIDITY ───
+    if(/* window is INVALID */){
+
+        // ─── SHRINK ONCE ───
+        // remove s[left] from state
+        left++;
+    }
+
+    // ─── TRACK MAXIMUM ───
+    maximum = max(maximum, right - left + 1);
+
+    right++;
+}
+return maximum;
+```
+
+> ⚠️ Use `if` not `while` — window only needs to shrink by 1 each time.
+
+---
+
+## Template 2 — Find SHORTEST Window
+### (Problem 6)
+
+```cpp
+int left = 0, right = 0;
+int minWindow = INT_MAX, start = 0;
+// extra variables based on problem
+// (need map, Track map, have, required)
+
+while(right < size){
+
+    // ─── EXPAND ───
+    // add s[right] to state
+    // update have if condition met
+
+    // ─── SHRINK WHILE VALID ───
+    while(/* window is VALID */){
+
+        // ─── TRACK MINIMUM ───
+        if(right - left + 1 < minWindow){
+            minWindow = right - left + 1;
+            start = left;
+        }
+
+        // ─── SHRINK ───
+        // remove s[left] from state
+        // update have if condition broken
+        left++;
+    }
+
+    right++;
+}
+return minWindow == INT_MAX ? "" : s.substr(start, minWindow);
+```
+
+> ⚠️ Use `while` not `if` — keep shrinking as long as window is valid.
+
+---
+
+### What Changes Per Problem
+
+```
+The TEMPLATE stays same.
+Only these parts change:
+```
+
+| Problem | State | Invalid Condition |
+|---|---|---|
+| Max Consecutive Ones | `int zeros` | `zeros > k` |
+| Non-Repeating Chars | `set<char>` | `set has duplicate` |
+| Fruit Baskets | `map<int,int>` | `map.size() > 2` |
+| K Distinct Chars | `map<char,int>` | `map.size() > k` |
+| Char Replacement | `map+maxFreq` | `size-maxFreq > k` |
+| Min Window | `need+Track+have` | `have == required` |
+
+---
+
+### Decision Tree
+
+```
+Is the problem asking for:
+
+LONGEST subarray/substring?
+    ↓
+    Use Template 1 (if + max)
+    
+    What is the constraint?
+    ├── count of something ≤ k  → use int counter
+    ├── distinct elements ≤ k   → use map.size()
+    ├── no duplicates            → use set
+    └── frequency based          → use map + maxFreq
+
+SHORTEST subarray/substring?
+    ↓
+    Use Template 2 (while + min)
+    
+    Track validity with:
+    └── have == required → use two maps
+```
+
+---
+
+### One Rule To Remember
+
+```
+LONGEST  → if (invalid) shrink once   → window never decreases
+SHORTEST → while (valid) shrink fully → find smallest valid window
+```
